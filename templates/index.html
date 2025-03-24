@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deepfake Detector</title>
+    <style>
+      
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            background: url('https://source.unsplash.com/1600x900/?cyber,ai,deepfake') no-repeat center center/cover;
+            color: white;
+        }
+        
+       
+        .container {
+            width: 50%;
+            margin: auto;
+            padding: 20px;
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            box-shadow: 0px 0px 15px rgba(0, 255, 255, 0.5);
+            margin-top: 50px;
+        }
+        
+        h2 {
+            color: cyan;
+            text-shadow: 0px 0px 10px cyan;
+        }
+
+       
+        input[type="file"] {
+            display: block;
+            margin: 10px auto;
+            padding: 10px;
+            border-radius: 5px;
+            background: black;
+            color: cyan;
+            border: 1px solid cyan;
+        }
+
+       
+        button {
+            background: cyan;
+            color: black;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            background: white;
+            color: black;
+        }
+
+       
+        img {
+            max-width: 100%;
+            height: auto;
+            margin-top: 10px;
+            border-radius: 10px;
+            border: 2px solid cyan;
+            display: none;
+        }
+
+     
+        .result {
+            font-size: 22px;
+            margin-top: 20px;
+            font-weight: bold;
+            padding: 10px;
+            border-radius: 5px;
+            background: rgba(0, 255, 255, 0.2);
+            box-shadow: 0px 0px 10px cyan;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>🔍 Deepfake Image Detector</h2>
+        
+       
+        <input type="file" id="imageUpload" accept="image/*">
+        <br>
+        
+        <img id="previewImage">
+        
+        <br><br>
+        <button onclick="uploadImage()">Detect Deepfake</button>
+        
+        
+        <div id="result" class="result"></div>
+    </div>
+
+    <script>
+        
+        document.getElementById("imageUpload").addEventListener("change", function(event) {
+            let file = event.target.files[0];
+            if (file) {
+                let reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById("previewImage").src = e.target.result;
+                    document.getElementById("previewImage").style.display = "block";
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        
+        function uploadImage() {
+            let fileInput = document.getElementById("imageUpload");
+            let file = fileInput.files[0];
+
+            if (!file) {
+                alert("Please upload an image.");
+                return;
+            }
+
+            let formData = new FormData();
+            formData.append("file", file);
+
+            fetch("/predict", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("result").innerHTML = 
+                    `Prediction: <strong>${data.result}</strong> <br> Confidence: <strong>${data.confidence}</strong>`;
+            })
+            .catch(error => {
+                document.getElementById("result").innerHTML = "Error processing image.";
+                console.error("Error:", error);
+            });
+        }
+    </script>
+
+</body>
+</html>
+
